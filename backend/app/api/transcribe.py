@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, File, UploadFile
 from app.config import settings
 from app.services.stats import stats
+from app.services.customer_profile import customer_profile
 
 router = APIRouter(prefix="/api")
 
@@ -10,6 +11,11 @@ router = APIRouter(prefix="/api")
 @router.get("/stats")
 async def get_stats() -> dict:
     return stats.to_dict()
+
+
+@router.get("/customer-profile")
+async def get_customer_profile() -> dict:
+    return customer_profile.to_dict()
 
 
 @router.post("/transcribe")

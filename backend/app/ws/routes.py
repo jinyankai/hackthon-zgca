@@ -7,6 +7,7 @@ from app.services.conversation import store
 from app.services.emotion import apply_emotion_hit
 from app.services.llm_service import polish_agent, summarize_conversation, translate_customer
 from app.services.stats import stats
+from app.services.customer_profile import customer_profile
 from app.ws.manager import manager
 
 router = APIRouter()
@@ -44,6 +45,10 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
                 store.set_polished(None)
                 store.state.emotionStatus = apply_emotion_hit(store.state.emotionStatus, translated.emotionLevel)
                 stats.record_translation(translated.emotionLevel, translated.emotionScore, translated.riskFlags, store.state.emotionStatus.battery)
+                customer_profile.record(translated.emotionLevel, translated.riskFlags)
+
+                if customer_profile.is_flagged and customer_profile.high_emotion_count == 3:
+                    await manager.send_role("agent", "system_alert", {"level": "critical", "message": "⚠️ 该客户已被标记为高风险用户（连续3次高压情绪），请注意自我保护。"})
 
                 if translated.source == "mock":
                     await manager.send_role("agent", "system_alert", {"level": "warning", "message": "LLM 不可用或超时，已使用演示 fallback。"})

@@ -13,18 +13,32 @@ interface Stats {
   sessionStart: string;
 }
 
+interface CustomerProfile {
+  highEmotionCount: number;
+  totalMessages: number;
+  riskFlags: string[];
+  isFlagged: boolean;
+  flaggedAt: string | null;
+  lastEmotionLevel: string;
+}
+
 export function StatsPanel() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [profile, setProfile] = useState<CustomerProfile | null>(null);
 
   useEffect(() => {
-    const fetchStats = () => {
+    const fetchData = () => {
       fetch("http://localhost:8000/api/stats")
         .then((r) => r.json())
         .then(setStats)
         .catch(() => {});
+      fetch("http://localhost:8000/api/customer-profile")
+        .then((r) => r.json())
+        .then(setProfile)
+        .catch(() => {});
     };
-    fetchStats();
-    const interval = setInterval(fetchStats, 3000);
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -35,6 +49,13 @@ export function StatsPanel() {
 
   return (
     <div className="stats-panel">
+      {profile?.isFlagged && (
+        <div className="customer-flagged-alert">
+          <AlertTriangle size={16} />
+          <span>当前客户已被标记为高风险用户 — 累计 {profile.highEmotionCount} 次高压情绪</span>
+        </div>
+      )}
+
       <div className="stats-header">
         <BarChart3 size={18} />
         <h2>实时防护统计</h2>
