@@ -2,6 +2,7 @@
 
 import { Shield } from "lucide-react";
 import type { TranslatedMessage } from "@/types/conversation";
+import { DissolveText } from "@/components/shared/DissolveText";
 
 export function ShieldCompare({ translated }: { translated?: TranslatedMessage | null }) {
   if (!translated) {
@@ -25,7 +26,7 @@ export function ShieldCompare({ translated }: { translated?: TranslatedMessage |
             无护盾 — 原始消息
           </div>
           <div className="compare-content compare-content-raw">
-            {translated.originalText}
+            <DissolveText text={translated.originalText} active={translated.emotionLevel !== "mild"} />
           </div>
         </div>
 

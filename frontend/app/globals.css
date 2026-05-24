@@ -1399,3 +1399,23 @@ textarea:focus {
   30% { opacity: 1; transform: scale(1) translateY(-5px); }
   100% { opacity: 0; transform: scale(0.5) translateY(-20px); }
 }
+
+/* === Dissolve Text Animation === */
+.dissolve-text {
+  display: inline;
+}
+
+.dissolve-char {
+  display: inline-block;
+  transition: all 0.6s ease;
+}
+
+.dissolve-char.dissolving {
+  animation: dissolve 1.2s ease forwards;
+}
+
+@keyframes dissolve {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+  50% { opacity: 0.5; transform: translate(var(--dx, 10px), var(--dy, -15px)) scale(0.8); filter: blur(1px); }
+  100% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, -30px)) scale(0.3); filter: blur(3px); }
+}
