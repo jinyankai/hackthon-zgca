@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 情绪护盾 v1 — 双向情绪防火墙</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="app-header">
+  <span class="shield-icon">&#x1F6E1;</span>
+  <div>
+    <h1>AI 情绪护盾</h1>
+    <div class="subtitle">双向情绪防火墙 &middot; Emotion Shield v1</div>
+  </div>
+  <div class="header-status" id="connStatus">&#x1F534; 未连接</div>
+</header>
+
+<div class="main-container">
+  <!-- Customer Panel -->
+  <div class="panel customer-panel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span>&#x1F464;</span> 客户视角
+        <span class="panel-badge customer-badge">Customer View</span>
+      </div>
+      <div class="panel-hint">客户看不到 AI 翻译过程</div>
+    </div>
+    <div class="chat-area" id="customerChat">
+      <div class="msg msg-system">对话开始 — 客户将在此发送消息</div>
+    </div>
+    <div class="input-area">
+      <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="语音输入">&#x1F3A4;</button>
+      <textarea id="customerInput" placeholder="扮演客户输入消息..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();customerSend()}"></textarea>
+      <button class="btn btn-primary" onclick="customerSend()">发送</button>
+    </div>
+  </div>
+
+  <!-- Agent Panel -->
+  <div class="panel agent-panel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span>&#x1F9D1;&#x200D;&#x1F4BB;</span> 服务者视角
+        <span class="panel-badge agent-badge">Agent View</span>
+      </div>
+      <div class="panel-hint">AI 翻译 + 情绪保护</div>
+    </div>
+    <div class="energy-bar-container">
+      <div class="energy-bar-label">
+        <span>&#x1F50B; 情绪电量</span>
+        <span id="energyValue">100%</span>
+      </div>
+      <div class="energy-bar-track">
+        <div class="energy-bar-fill energy-high" id="energyFill" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="chat-area" id="agentChat">
+      <div class="msg msg-system">等待客户消息 — AI 将自动翻译情绪</div>
+    </div>
+    <div class="input-area">
+      <textarea id="agentInput" placeholder="输入回复，AI 将优化话术..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();agentDraft()}"></textarea>
+      <button class="btn btn-success" onclick="agentDraft()">&#x2728; AI优化</button>
+    </div>
+  </div>
+</div>
+
+<div class="demo-controls">
+  <button class="btn btn-ghost" onclick="runDemo()">&#x25B6; 自动演示</button>
+  <button class="btn btn-ghost" onclick="resetDemo()">&#x21BA; 重置</button>
+  <span class="status-text" id="statusText">就绪</span>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
