@@ -11,6 +11,7 @@ export type DemoEvent =
   | { type: "agent_polished"; payload: PolishedReply }
   | { type: "agent_approved"; payload: { text: string } }
   | { type: "agent_end_conversation"; payload: Record<string, never> }
+  | { type: "demo_reset"; payload: Record<string, never> }
   | { type: "conversation_summary"; payload: ConversationSummary }
   | { type: "system_alert"; payload: { level: "info" | "warning" | "critical"; message: string } }
   | { type: "sync_state"; payload: ConversationState };

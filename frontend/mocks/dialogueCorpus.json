@@ -1,0 +1,91 @@
+{
+  "manualScenarios": [
+    {
+      "id": "late-order",
+      "title": "暴怒催单",
+      "customerText": "你们到底会不会送？半小时了还没到！再不来我就投诉退款！",
+      "agentDraft": "我帮你看一下，别急。",
+      "inputMode": "script"
+    },
+    {
+      "id": "refund-threat",
+      "title": "退款威胁",
+      "customerText": "你们服务太差了，我现在就要退款，不处理我就差评。",
+      "agentDraft": "退款要看规则，不是我说退就退。",
+      "inputMode": "script"
+    },
+    {
+      "id": "verbal-attack",
+      "title": "极端辱骂",
+      "customerText": "你们都是废物吗？这点事都做不好？",
+      "agentDraft": "我现在处理。",
+      "inputMode": "script"
+    }
+  ],
+  "autoScripts": [
+    {
+      "id": "late-refund-escalation",
+      "title": "催单升级到退款",
+      "description": "客户先催单，再威胁退款，最后情绪缓和。",
+      "turns": [
+        {
+          "customerText": "你们到底会不会送？半小时了还没到！再不来我就投诉退款！",
+          "agentDraft": "我马上帮你看配送到哪里了，别急。"
+        },
+        {
+          "customerText": "你们每次都说核实，能不能给个准话？我现在就要退款。",
+          "agentDraft": "退款要按平台规则，我先看订单状态。"
+        },
+        {
+          "customerText": "那你快点，我现在就等你结果。",
+          "agentDraft": "我会继续跟进并尽快给你明确结果。"
+        }
+      ]
+    },
+    {
+      "id": "malicious-verbal-attack",
+      "title": "强烈恶意攻击",
+      "description": "客户出现明显辱骂，演示情绪护盾和结束后疏导。",
+      "turns": [
+        {
+          "customerText": "你们都是废物吗？这点事都做不好？",
+          "agentDraft": "我现在处理。"
+        },
+        {
+          "customerText": "别跟我废话，今天不给我解决我就差评投诉。",
+          "agentDraft": "我会先聚焦处理你的问题，并确认可执行方案。"
+        }
+      ]
+    },
+    {
+      "id": "wrong-item-restaurant",
+      "title": "餐饮错单投诉",
+      "description": "客户反馈错单并要求处理，适合展示事实保真。",
+      "turns": [
+        {
+          "customerText": "我点的是牛肉饭，你们送来的是鸡肉饭，这也太离谱了吧？",
+          "agentDraft": "我先帮你核实订单和出餐记录。"
+        },
+        {
+          "customerText": "我现在没法吃，必须给我一个处理办法。",
+          "agentDraft": "我会确认可选处理方式，再给你明确答复。"
+        }
+      ]
+    },
+    {
+      "id": "rider-delay-rain",
+      "title": "雨天配送延迟",
+      "description": "客户持续追问配送进度，适合演示不过度承诺。",
+      "turns": [
+        {
+          "customerText": "外面下雨不是我的问题，我已经等了四十分钟了。",
+          "agentDraft": "我理解你等久了，我马上核实骑手位置。"
+        },
+        {
+          "customerText": "你别只会说理解，我要知道到底什么时候到。",
+          "agentDraft": "我会帮你确认最新配送进度，但不乱承诺具体时间。"
+        }
+      ]
+    }
+  ]
+}

@@ -24,6 +24,10 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
             if event.type == "sync_state":
                 await manager.send_role(role, "sync_state", store.to_dict())
 
+            elif event.type == "demo_reset":
+                store.reset()
+                await manager.broadcast("sync_state", store.to_dict())
+
             elif event.type == "customer_send":
                 text = str(event.payload.get("text", "")).strip()
                 input_mode = event.payload.get("inputMode", "text")

@@ -63,6 +63,51 @@ button:disabled {
   font-size: 28px;
 }
 
+.auto-demo {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 0 auto 16px;
+  max-width: 1480px;
+  padding: 14px 16px;
+}
+
+.auto-demo-copy {
+  min-width: 0;
+}
+
+.auto-demo-copy .section-title {
+  margin-bottom: 6px;
+}
+
+.auto-demo-copy h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.auto-demo-copy p {
+  line-height: 1.45;
+  margin: 0 0 6px;
+}
+
+.auto-demo-copy span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auto-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .split-screen {
   display: grid;
   gap: 18px;
@@ -608,6 +653,19 @@ textarea:focus {
 }
 
 @media (max-width: 980px) {
+  .auto-demo {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .auto-demo-actions {
+    justify-content: stretch;
+  }
+
+  .auto-demo-actions button {
+    flex: 1;
+  }
+
   .split-screen,
   .agent-grid,
   .info-grid,
