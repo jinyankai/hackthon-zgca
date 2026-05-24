@@ -2,8 +2,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter, File, UploadFile
 from app.config import settings
+from app.services.stats import stats
 
 router = APIRouter(prefix="/api")
+
+
+@router.get("/stats")
+async def get_stats() -> dict:
+    return stats.to_dict()
 
 
 @router.post("/transcribe")

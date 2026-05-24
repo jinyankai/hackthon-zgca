@@ -11,6 +11,7 @@ import { EmotionBattery } from "./EmotionBattery";
 import { FilteredMessageCard } from "./FilteredMessageCard";
 import { SuggestionPanel } from "./SuggestionPanel";
 import { ConversationSummaryPanel } from "./ConversationSummaryPanel";
+import { StatsPanel } from "./StatsPanel";
 import StyleSelector from "./StyleSelector";
 
 const initialEmotion = {
@@ -125,6 +126,8 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
       </div>
 
       <ConversationSummaryPanel summary={state?.summary} />
+
+      <StatsPanel />
     </section>
   );
 }

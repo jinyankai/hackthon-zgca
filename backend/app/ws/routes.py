@@ -6,6 +6,7 @@ from app.schemas.events import WsEvent
 from app.services.conversation import store
 from app.services.emotion import apply_emotion_hit
 from app.services.llm_service import polish_agent, summarize_conversation, translate_customer
+from app.services.stats import stats
 from app.ws.manager import manager
 
 router = APIRouter()
@@ -42,6 +43,7 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
                 store.set_translated(translated)
                 store.set_polished(None)
                 store.state.emotionStatus = apply_emotion_hit(store.state.emotionStatus, translated.emotionLevel)
+                stats.record_translation(translated.emotionLevel, translated.emotionScore, translated.riskFlags, store.state.emotionStatus.battery)
 
                 if translated.source == "mock":
                     await manager.send_role("agent", "system_alert", {"level": "warning", "message": "LLM 不可用或超时，已使用演示 fallback。"})
