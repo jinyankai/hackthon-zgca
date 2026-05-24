@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.services.conversation import store
 from app.ws.routes import router as ws_router
+from app.api.transcribe import router as api_router
 
 app = FastAPI(title="AI Emotion Shield MVP", version="0.1.0")
 
@@ -18,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(ws_router)
+app.include_router(api_router)
 
 
 @app.get("/health")

@@ -48,6 +48,7 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
 
                 await manager.send_role("agent", "customer_translated", translated.model_dump())
                 await manager.broadcast("sync_state", store.to_dict())
+                store.persist()
 
             elif event.type == "agent_draft":
                 draft = str(event.payload.get("text", "")).strip()
@@ -71,6 +72,7 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
                 message = store.add_agent_message(text)
                 await manager.broadcast("agent_approved", {"text": message.text})
                 await manager.broadcast("sync_state", store.to_dict())
+                store.persist()
 
             elif event.type == "agent_end_conversation":
                 if not store.state.messages:

@@ -76,3 +76,18 @@ export function voiceLabel(status: SpeechStatus) {
   if (status === "failed") return "语音不可用，可改用文本";
   return "可语音输入";
 }
+
+export async function transcribeViaBackend(audioBlob: Blob): Promise<{ ok: boolean; text: string; error?: string }> {
+  const formData = new FormData();
+  formData.append("file", audioBlob, "recording.webm");
+
+  try {
+    const resp = await fetch("http://localhost:8000/api/transcribe", {
+      method: "POST",
+      body: formData,
+    });
+    return await resp.json();
+  } catch {
+    return { ok: false, text: "", error: "network_error" };
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useDemoSocket } from "@/hooks/useDemoSocket";
+import { useConversationPersistence } from "@/hooks/useConversationPersistence";
 import type { ConversationState, PolishedReply } from "@/types/conversation";
 import type { DemoEvent } from "@/types/events";
 import { ConnectionBadge } from "@/components/shared/ConnectionBadge";
@@ -26,6 +27,8 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
   const [isPolishing, setIsPolishing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
+
+  useConversationPersistence(state);
 
   const handleEvent = (event: DemoEvent) => {
     if (event.type === "sync_state") {

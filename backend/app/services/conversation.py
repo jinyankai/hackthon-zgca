@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 from uuid import uuid4
 
 from app.config import settings
 from app.schemas.conversation import ConversationState, ConversationSummary, InputMode, Message, PolishedReply, TranslatedMessage
 from app.services.emotion import make_initial_emotion_status
+
+PERSIST_PATH = Path(__file__).resolve().parents[2] / "data" / "conversation_history.json"
 
 
 class ConversationStore:
@@ -77,6 +81,25 @@ class ConversationStore:
 
     def to_dict(self) -> dict:
         return self.state.model_dump()
+
+    def persist(self) -> None:
+        PERSIST_PATH.parent.mkdir(parents=True, exist_ok=True)
+        data = {
+            "messages": [m.model_dump() for m in self.state.messages],
+            "ended": self.state.ended,
+            "savedAt": datetime.now(timezone.utc).isoformat(),
+        }
+        PERSIST_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def load_persisted(self) -> None:
+        if not PERSIST_PATH.exists():
+            return
+        try:
+            data = json.loads(PERSIST_PATH.read_text(encoding="utf-8"))
+            for m in data.get("messages", []):
+                self.state.messages.append(Message.model_validate(m))
+        except Exception:
+            pass
 
 
 store = ConversationStore()

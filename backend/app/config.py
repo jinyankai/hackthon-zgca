@@ -17,6 +17,8 @@ class Settings:
     llm_model: str = os.getenv("LLM_MODEL", "deepseek-chat")
     llm_timeout_seconds: float = float(os.getenv("LLM_TIMEOUT_SECONDS", "4"))
     conversation_id: str = "demo-room"
+    whisper_api_url: str | None = os.getenv("WHISPER_API_URL")
+    whisper_model: str = os.getenv("WHISPER_MODEL", "whisper-1")
 
     @property
     def llm_live_enabled(self) -> bool:

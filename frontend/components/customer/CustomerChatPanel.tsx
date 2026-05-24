@@ -1,9 +1,9 @@
 "use client";
 
 import { Mic, Send, Square, Type } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useDemoSocket } from "@/hooks/useDemoSocket";
-import { getSpeechRecognition, type SpeechStatus, voiceLabel } from "@/lib/speech";
+import { getSpeechRecognition, transcribeViaBackend, type SpeechStatus, voiceLabel } from "@/lib/speech";
 import { mockTranscript, type DemoScenario } from "@/mocks/demoScript";
 import type { ConversationState, InputMode } from "@/types/conversation";
 import type { DemoEvent } from "@/types/events";
@@ -15,6 +15,8 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
   const [text, setText] = useState("");
   const [inputMode, setInputMode] = useState<InputMode>("text");
   const [voiceStatus, setVoiceStatus] = useState<SpeechStatus>("idle");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const handleEvent = (event: DemoEvent) => {
     if (event.type === "sync_state") setState(event.payload);
@@ -46,7 +48,7 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
   const startVoice = () => {
     const Recognition = getSpeechRecognition();
     if (!Recognition) {
-      setVoiceStatus("failed");
+      startBackendRecording();
       return;
     }
 
@@ -60,11 +62,11 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
       setVoiceStatus("transcribing");
       recognition.stop();
     };
-    recognition.onerror = () => setVoiceStatus("failed");
+    recognition.onerror = () => startBackendRecording();
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript?.trim();
       if (!transcript) {
-        setVoiceStatus("failed");
+        startBackendRecording();
         return;
       }
       setText(transcript);
@@ -73,6 +75,44 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
     };
 
     recognition.start();
+  };
+
+  const startBackendRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      audioChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setVoiceStatus("transcribing");
+        const result = await transcribeViaBackend(blob);
+        if (result.ok && result.text) {
+          setText(result.text);
+          setInputMode("voice");
+          setVoiceStatus("transcript_ready");
+        } else {
+          setVoiceStatus("failed");
+        }
+      };
+
+      recorder.start();
+      setVoiceStatus("recording");
+    } catch {
+      setVoiceStatus("failed");
+    }
+  };
+
+  const stopBackendRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
   };
 
   return (
@@ -91,8 +131,12 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
         ) : (
           customerMessages.map((message) => (
             <div className={`bubble ${message.sender === "customer" ? "from-customer" : "from-agent"}`} key={message.id}>
+              {message.sender === "agent" && <div className="bubble-dot" />}
               <span>{message.sender === "customer" ? "我" : "客服"}</span>
               <p>{message.text}</p>
+              <span className="bubble-time">
+                {new Date(message.createdAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
+              </span>
             </div>
           ))
         )}
@@ -101,7 +145,7 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
       <DemoScriptButtons onPick={pickScenario} />
 
       <div className="voice-row">
-        <button className="icon-button" onClick={startVoice} title="语音输入">
+        <button className="icon-button" onClick={voiceStatus === "recording" ? stopBackendRecording : startVoice} title="语音输入">
           {voiceStatus === "recording" ? <Square size={18} /> : <Mic size={18} />}
         </button>
         <span className={`voice-status ${voiceStatus}`}>{voiceLabel(voiceStatus)}</span>
