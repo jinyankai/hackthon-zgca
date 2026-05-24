@@ -170,10 +170,20 @@ def _default_recovery_tips(malicious_detected: bool) -> list[str]:
 
 from app.services.style_presets import get_style_instruction
 
-async def translate_customer(text: str, input_mode: str, context: str, message_id: str, style: str = "professional", char_name: str = "") -> TranslatedMessage:
+
+def _get_adaptive_instruction(battery: int) -> str:
+    if battery > 70:
+        return ""
+    if battery > 40:
+        return "\n\n【自适应保护】当前服务者情绪电量偏低（{battery}%），请将翻译结果进一步温和化：减少负面词汇，多用缓冲语气，语调更加轻柔体贴。".format(battery=battery)
+    return "\n\n【高压保护模式】当前服务者情绪电量极低（{battery}%），请用最温柔、最具安抚感的方式转述客户意图。完全过滤攻击性内容，只保留核心诉求，用关怀的语气表达。如同一位贴心的朋友在帮忙转达。".format(battery=battery)
+
+
+async def translate_customer(text: str, input_mode: str, context: str, message_id: str, style: str = "professional", char_name: str = "", battery: int = 100) -> TranslatedMessage:
     base_prompt = (PROMPT_DIR / "downlink.md").read_text(encoding="utf-8")
     style_instruction = get_style_instruction(style, char_name)
-    system_prompt = f"{base_prompt}\n\n{style_instruction}"
+    adaptive_instruction = _get_adaptive_instruction(battery)
+    system_prompt = f"{base_prompt}\n\n{style_instruction}{adaptive_instruction}"
     user_prompt = f"客户原文：{text}\n\n输入方式：{input_mode}\n\n已知上下文：{context}"
 
     try:

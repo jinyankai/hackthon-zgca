@@ -38,7 +38,7 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
                     continue
 
                 message = store.add_customer_message(text, input_mode)
-                translated = await translate_customer(text, input_mode, store.to_context(), message.id, store.agent_style, store.agent_char_name)
+                translated = await translate_customer(text, input_mode, store.to_context(), message.id, store.agent_style, store.agent_char_name, store.state.emotionStatus.battery)
                 store.set_translated(translated)
                 store.set_polished(None)
                 store.state.emotionStatus = apply_emotion_hit(store.state.emotionStatus, translated.emotionLevel)
