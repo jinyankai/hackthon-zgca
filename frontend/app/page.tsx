@@ -3,9 +3,15 @@
 import { useState } from "react";
 import { AgentConsole } from "@/components/agent/AgentConsole";
 import { CustomerChatPanel } from "@/components/customer/CustomerChatPanel";
+import { WelcomePage } from "@/components/shared/WelcomePage";
 
 export default function Home() {
+  const [entered, setEntered] = useState(false);
   const [seededDraft, setSeededDraft] = useState("");
+
+  if (!entered) {
+    return <WelcomePage onEnter={() => setEntered(true)} />;
+  }
 
   return (
     <main className="app-shell">

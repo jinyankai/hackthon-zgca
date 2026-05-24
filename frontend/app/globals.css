@@ -1419,3 +1419,183 @@ textarea:focus {
   50% { opacity: 0.5; transform: translate(var(--dx, 10px), var(--dy, -15px)) scale(0.8); filter: blur(1px); }
   100% { opacity: 0; transform: translate(var(--dx, 20px), var(--dy, -30px)) scale(0.3); filter: blur(3px); }
 }
+
+/* === Welcome Page === */
+.welcome-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  animation: welcomeFadeIn 0.8s ease both;
+}
+
+.welcome-exit {
+  animation: welcomeFadeOut 0.6s ease both;
+}
+
+@keyframes welcomeFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes welcomeFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.05); filter: blur(4px); }
+}
+
+.welcome-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.welcome-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.4), transparent);
+  top: -100px;
+  right: -100px;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+  bottom: -50px;
+  left: -50px;
+  animation-delay: -3s;
+}
+
+.orb-3 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -5s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px;
+  animation: contentSlideUp 1s ease 0.3s both;
+}
+
+@keyframes contentSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-logo {
+  margin-bottom: 24px;
+}
+
+.logo-shield {
+  display: inline-flex;
+  position: relative;
+  color: var(--cyan);
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+  animation: logoBreath 3s ease infinite;
+}
+
+.logo-heart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  color: var(--coral);
+  filter: drop-shadow(0 0 8px rgba(255, 77, 106, 0.5));
+}
+
+@keyframes logoBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.welcome-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-slogan {
+  font-size: 16px;
+  color: var(--muted);
+  margin: 0 0 36px;
+  letter-spacing: 2px;
+}
+
+.welcome-features {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.welcome-feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.welcome-feature svg { color: var(--cyan); }
+
+.welcome-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 36px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 255, 136, 0.1));
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.welcome-enter:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 255, 136, 0.15));
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.welcome-enter:active { transform: translateY(0) scale(0.98); }
+
+.welcome-credit {
+  margin-top: 40px;
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.5;
+  letter-spacing: 1px;
+}
