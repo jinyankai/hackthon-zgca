@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.mocks.fallback import mock_polish_agent, mock_translate_customer
+from app.mocks.fallback import mock_polish_agent, mock_summarize_conversation, mock_translate_customer
 
 
 class MockFallbackTest(unittest.TestCase):
@@ -17,6 +17,14 @@ class MockFallbackTest(unittest.TestCase):
     def test_refund_draft_is_polished_without_overpromising(self):
         result = mock_polish_agent("退款要看规则，不是我说退就退。")
         self.assertIn("根据订单状态和平台规则确认", result["polishedText"])
+
+    def test_extreme_conversation_summary_supports_agent(self):
+        result = mock_summarize_conversation(
+            [{"sender": "customer", "text": "你们都是废物吗？这点事都做不好？"}],
+            {"emotionLevel": "extreme", "riskFlags": ["攻击性表达"], "coreRequest": "要求尽快处理当前问题。"},
+        )
+        self.assertTrue(result["maliciousDetected"])
+        self.assertIn("不是你的个人责任", result["supportMessage"])
 
 
 if __name__ == "__main__":

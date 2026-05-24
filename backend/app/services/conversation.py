@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.config import settings
-from app.schemas.conversation import ConversationState, InputMode, Message, PolishedReply, TranslatedMessage
+from app.schemas.conversation import ConversationState, ConversationSummary, InputMode, Message, PolishedReply, TranslatedMessage
 from app.services.emotion import make_initial_emotion_status
 
 
@@ -19,10 +19,16 @@ class ConversationStore:
             latestTranslated=None,
             latestPolished=None,
             emotionStatus=make_initial_emotion_status(),
+            ended=False,
+            summary=None,
         )
         return self.state
 
     def add_customer_message(self, text: str, input_mode: InputMode = "text") -> Message:
+        if self.state.ended:
+            self.state.ended = False
+            self.state.summary = None
+
         message = Message(
             id=f"msg-{uuid4().hex[:8]}",
             conversationId=self.state.conversationId,
@@ -52,6 +58,10 @@ class ConversationStore:
 
     def set_polished(self, polished: PolishedReply | None) -> None:
         self.state.latestPolished = polished
+
+    def end_conversation(self, summary: ConversationSummary) -> None:
+        self.state.ended = True
+        self.state.summary = summary
 
     def to_context(self) -> str:
         recent = self.state.messages[-6:]

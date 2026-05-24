@@ -5,7 +5,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.schemas.events import WsEvent
 from app.services.conversation import store
 from app.services.emotion import apply_emotion_hit
-from app.services.llm_service import polish_agent, translate_customer
+from app.services.llm_service import polish_agent, summarize_conversation, translate_customer
 from app.ws.manager import manager
 
 router = APIRouter()
@@ -64,6 +64,20 @@ async def demo_ws(websocket: WebSocket, role: str = "viewer") -> None:
 
                 message = store.add_agent_message(text)
                 await manager.broadcast("agent_approved", {"text": message.text})
+                await manager.broadcast("sync_state", store.to_dict())
+
+            elif event.type == "agent_end_conversation":
+                if not store.state.messages:
+                    await manager.send_role(role, "system_alert", {"level": "warning", "message": "暂无可复盘的对话。"})
+                    continue
+
+                messages = [message.model_dump() for message in store.state.messages]
+                latest_translated = store.state.latestTranslated.model_dump() if store.state.latestTranslated else None
+                summary = await summarize_conversation(messages, latest_translated, store.state.emotionStatus.model_dump())
+                store.end_conversation(summary)
+                if summary.source == "mock":
+                    await manager.send_role("agent", "system_alert", {"level": "warning", "message": "LLM 不可用或超时，已使用复盘 fallback。"})
+                await manager.send_role("agent", "conversation_summary", summary.model_dump())
                 await manager.broadcast("sync_state", store.to_dict())
 
     except WebSocketDisconnect:

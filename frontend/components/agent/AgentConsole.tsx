@@ -9,6 +9,7 @@ import { AgentReplyEditor } from "./AgentReplyEditor";
 import { EmotionBattery } from "./EmotionBattery";
 import { FilteredMessageCard } from "./FilteredMessageCard";
 import { SuggestionPanel } from "./SuggestionPanel";
+import { ConversationSummaryPanel } from "./ConversationSummaryPanel";
 
 const initialEmotion = {
   battery: 100,
@@ -22,6 +23,7 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
   const [draft, setDraft] = useState("");
   const [polished, setPolished] = useState<PolishedReply | null>(null);
   const [isPolishing, setIsPolishing] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
 
   const handleEvent = (event: DemoEvent) => {
@@ -36,9 +38,14 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
       setIsPolishing(false);
       setPolished(event.payload);
     }
+    if (event.type === "conversation_summary") {
+      setIsEnding(false);
+      setAlert(event.payload.maliciousDetected ? "检测到强烈恶意表达，已生成服务者疏导建议。" : "对话已结束，复盘已生成。");
+    }
     if (event.type === "system_alert") {
       setAlert(event.payload.message);
       setIsPolishing(false);
+      setIsEnding(false);
     }
   };
 
@@ -58,6 +65,12 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
     send("agent_approved", { text });
     setDraft("");
     setPolished(null);
+  };
+
+  const endConversation = () => {
+    if (!state?.messages.length || isEnding) return;
+    setIsEnding(true);
+    send("agent_end_conversation", {});
   };
 
   return (
@@ -96,6 +109,14 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
         onPolish={polish}
         onApprove={approve}
       />
+
+      <div className="end-row">
+        <button className="danger-button" onClick={endConversation} disabled={!state?.messages.length || isEnding}>
+          {isEnding ? "复盘生成中" : "结束对话并生成复盘"}
+        </button>
+      </div>
+
+      <ConversationSummaryPanel summary={state?.summary} />
     </section>
   );
 }

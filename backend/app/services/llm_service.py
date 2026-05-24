@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
 import httpx
 
 from app.config import settings
-from app.mocks.fallback import mock_polish_agent, mock_translate_customer
-from app.schemas.conversation import PolishedReply, TranslatedMessage
+from app.mocks.fallback import detect_malicious, mock_polish_agent, mock_summarize_conversation, mock_translate_customer
+from app.schemas.conversation import ConversationSummary, PolishedReply, TranslatedMessage
 
 try:
     from openai import AsyncOpenAI
@@ -129,6 +130,44 @@ def _normalize_polish(data: dict, fallback_text: str, source: str) -> PolishedRe
     )
 
 
+def _normalize_summary(data: dict, messages: list[dict], latest_translated: dict | None, source: str) -> ConversationSummary:
+    latest_translated = latest_translated or {}
+    local_malicious, local_evidence = detect_malicious(
+        messages,
+        latest_translated.get("riskFlags") or latest_translated.get("risk_flags") or [],
+        latest_translated.get("emotionLevel") or latest_translated.get("emotion_level"),
+    )
+    model_evidence = data.get("maliciousEvidence") or data.get("malicious_evidence") or []
+    malicious_detected = bool(data.get("maliciousDetected") or data.get("malicious_detected") or local_malicious)
+    evidence = list(dict.fromkeys([*model_evidence, *local_evidence]))
+
+    return ConversationSummary(
+        id=f"summary-{uuid4().hex[:8]}",
+        createdAt=datetime.now(timezone.utc).isoformat(),
+        summary=data.get("summary") or "本轮对话已结束，系统已完成要点梳理。",
+        customerRequest=data.get("customerRequest") or data.get("customer_request") or latest_translated.get("coreRequest") or "确认客户问题并给出下一步处理方式。",
+        handledResult=data.get("handledResult") or data.get("handled_result") or "已向客户给出专业回应，并保留服务者最终确认权。",
+        emotionReview=data.get("emotionReview") or data.get("emotion_review") or "客户存在情绪压力，服务者保持了专业回应。",
+        maliciousDetected=malicious_detected,
+        maliciousEvidence=evidence,
+        supportMessage=data.get("supportMessage") or data.get("support_message") or _default_support_message(malicious_detected),
+        recoveryTips=data.get("recoveryTips") or data.get("recovery_tips") or _default_recovery_tips(malicious_detected),
+        source=source,
+    )
+
+
+def _default_support_message(malicious_detected: bool) -> str:
+    if malicious_detected:
+        return "这次沟通中出现了明显攻击性表达。对方的恶意不是你的个人责任，你已经在边界内完成了专业处理。"
+    return "本轮沟通已经结束，你保持了清晰、克制和专业。可以短暂调整呼吸，再进入下一轮服务。"
+
+
+def _default_recovery_tips(malicious_detected: bool) -> list[str]:
+    if malicious_detected:
+        return ["离开屏幕30秒", "喝水并放松肩颈", "必要时请求同事接力"]
+    return ["记录处理要点", "短暂复位", "继续下一单"]
+
+
 async def translate_customer(text: str, input_mode: str, context: str, message_id: str) -> TranslatedMessage:
     system_prompt = (PROMPT_DIR / "downlink.md").read_text(encoding="utf-8")
     user_prompt = f"客户原文：{text}\n\n输入方式：{input_mode}\n\n已知上下文：{context}"
@@ -151,3 +190,22 @@ async def polish_agent(draft: str, context: str) -> PolishedReply:
     except Exception:
         data = mock_polish_agent(draft, context)
         return _normalize_polish(data, draft, "mock")
+
+
+async def summarize_conversation(messages: list[dict], latest_translated: dict | None, emotion_status: dict) -> ConversationSummary:
+    system_prompt = (PROMPT_DIR / "summary.md").read_text(encoding="utf-8")
+    user_prompt = json.dumps(
+        {
+            "messages": messages,
+            "latest_translated": latest_translated,
+            "emotion_status": emotion_status,
+        },
+        ensure_ascii=False,
+    )
+
+    try:
+        data = await _json_chat(system_prompt, user_prompt)
+        return _normalize_summary(data, messages, latest_translated, "llm")
+    except Exception:
+        data = mock_summarize_conversation(messages, latest_translated)
+        return _normalize_summary(data, messages, latest_translated, "mock")

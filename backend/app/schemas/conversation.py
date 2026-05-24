@@ -49,6 +49,20 @@ class PolishedReply(BaseModel):
     source: Literal["llm", "mock"] = "mock"
 
 
+class ConversationSummary(BaseModel):
+    id: str
+    createdAt: str
+    summary: str
+    customerRequest: str
+    handledResult: str
+    emotionReview: str
+    maliciousDetected: bool
+    maliciousEvidence: list[str]
+    supportMessage: str
+    recoveryTips: list[str]
+    source: Literal["llm", "mock"] = "mock"
+
+
 class EmotionStatus(BaseModel):
     battery: int = Field(ge=0, le=100)
     status: Literal["healthy", "warning", "critical"]
@@ -62,3 +76,5 @@ class ConversationState(BaseModel):
     latestTranslated: TranslatedMessage | None = None
     latestPolished: PolishedReply | None = None
     emotionStatus: EmotionStatus
+    ended: bool = False
+    summary: ConversationSummary | None = None

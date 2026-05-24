@@ -50,10 +50,26 @@ export interface EmotionStatus {
   restSuggested: boolean;
 }
 
+export interface ConversationSummary {
+  id: string;
+  createdAt: string;
+  summary: string;
+  customerRequest: string;
+  handledResult: string;
+  emotionReview: string;
+  maliciousDetected: boolean;
+  maliciousEvidence: string[];
+  supportMessage: string;
+  recoveryTips: string[];
+  source?: "llm" | "mock";
+}
+
 export interface ConversationState {
   conversationId: string;
   messages: Message[];
   latestTranslated?: TranslatedMessage | null;
   latestPolished?: PolishedReply | null;
   emotionStatus: EmotionStatus;
+  ended: boolean;
+  summary?: ConversationSummary | null;
 }
