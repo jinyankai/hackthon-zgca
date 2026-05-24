@@ -199,6 +199,10 @@ button:disabled {
   padding: 14px 18px 0;
 }
 
+.agent-voice-row {
+  padding: 0;
+}
+
 .voice-status {
   color: var(--muted);
   font-size: 14px;
@@ -552,6 +556,38 @@ textarea:focus {
   font-size: 13px;
   font-weight: 800;
   padding: 6px 10px;
+}
+
+.correction-note,
+.misrecognition-tips {
+  border-radius: 8px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.correction-note {
+  background: #e8f7ee;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.misrecognition-tips {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.misrecognition-tips span {
+  color: var(--ink);
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.misrecognition-tips p {
+  margin: 0;
 }
 
 .polished-box {

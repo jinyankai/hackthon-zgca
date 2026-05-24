@@ -3,51 +3,18 @@
 import { Mic, Send, Square, Type } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useDemoSocket } from "@/hooks/useDemoSocket";
+import { getSpeechRecognition, type SpeechStatus, voiceLabel } from "@/lib/speech";
 import { mockTranscript, type DemoScenario } from "@/mocks/demoScript";
 import type { ConversationState, InputMode } from "@/types/conversation";
 import type { DemoEvent } from "@/types/events";
 import { ConnectionBadge } from "@/components/shared/ConnectionBadge";
 import { DemoScriptButtons } from "./DemoScriptButtons";
 
-type VoiceStatus = "idle" | "recording" | "transcribing" | "transcript_ready" | "failed";
-
-interface BrowserSpeechRecognitionResultEvent extends Event {
-  results: {
-    [index: number]: {
-      [index: number]: {
-        transcript: string;
-        confidence: number;
-      };
-    };
-  };
-}
-
-interface BrowserSpeechRecognition {
-  lang: string;
-  interimResults: boolean;
-  maxAlternatives: number;
-  onstart: (() => void) | null;
-  onspeechend: (() => void) | null;
-  onerror: (() => void) | null;
-  onresult: ((event: BrowserSpeechRecognitionResultEvent) => void) | null;
-  start: () => void;
-  stop: () => void;
-}
-
-type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
-
-declare global {
-  interface Window {
-    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
-    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
-  }
-}
-
 export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft: string) => void }) {
   const [state, setState] = useState<ConversationState | null>(null);
   const [text, setText] = useState("");
   const [inputMode, setInputMode] = useState<InputMode>("text");
-  const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>("idle");
+  const [voiceStatus, setVoiceStatus] = useState<SpeechStatus>("idle");
 
   const handleEvent = (event: DemoEvent) => {
     if (event.type === "sync_state") setState(event.payload);
@@ -77,7 +44,7 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
   };
 
   const startVoice = () => {
-    const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    const Recognition = getSpeechRecognition();
     if (!Recognition) {
       setVoiceStatus("failed");
       return;
@@ -165,12 +132,4 @@ export function CustomerChatPanel({ onScenarioDraft }: { onScenarioDraft: (draft
       </div>
     </section>
   );
-}
-
-function voiceLabel(status: VoiceStatus) {
-  if (status === "recording") return "正在录音";
-  if (status === "transcribing") return "正在转写";
-  if (status === "transcript_ready") return "转写已填入输入框";
-  if (status === "failed") return "语音不可用";
-  return "可语音输入";
 }
