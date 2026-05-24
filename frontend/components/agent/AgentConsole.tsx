@@ -9,6 +9,7 @@ import { ConnectionBadge } from "@/components/shared/ConnectionBadge";
 import { AgentReplyEditor } from "./AgentReplyEditor";
 import { EmotionBattery } from "./EmotionBattery";
 import { FilteredMessageCard } from "./FilteredMessageCard";
+import { ShieldCompare } from "./ShieldCompare";
 import { SuggestionPanel } from "./SuggestionPanel";
 import { ConversationSummaryPanel } from "./ConversationSummaryPanel";
 import { StatsPanel } from "./StatsPanel";
@@ -98,6 +99,8 @@ export function AgentConsole({ seededDraft }: { seededDraft: string }) {
         <FilteredMessageCard translated={translated} />
         <EmotionBattery status={state?.emotionStatus ?? initialEmotion} />
       </div>
+
+      <ShieldCompare translated={translated} />
 
       <SuggestionPanel
         replies={translated?.suggestedReplies ?? []}
