@@ -2,6 +2,7 @@ const BACKEND_URL = "http://localhost:8000";
 
 let feishuActive = false;
 let binding = { type: "", id: "", label: "" };
+let searchTimeout = null;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -17,10 +18,18 @@ const loading = $("#loading");
 const bindingLabel = $("#binding-label");
 const btnBind = $("#btn-bind");
 const bindPanel = $("#bind-panel");
+const btnCollapse = $("#btn-collapse");
+
+// Bind panel elements
+const tabSearch = $("#tab-search");
+const tabManual = $("#tab-manual");
+const bindSearch = $("#bind-search");
+const bindManual = $("#bind-manual");
+const searchInput = $("#search-input");
+const searchResults = $("#search-results");
 const bindInput = $("#bind-input");
 const bindType = $("#bind-type");
 const btnBindConfirm = $("#btn-bind-confirm");
-const btnCollapse = $("#btn-collapse");
 
 function updateFeishuStatus(active) {
   feishuActive = active;
@@ -62,6 +71,52 @@ btnCollapse.addEventListener("click", () => {
 btnBind.addEventListener("click", () => {
   bindPanel.classList.toggle("hidden");
 });
+
+// Tab switching
+tabSearch.addEventListener("click", () => {
+  tabSearch.classList.add("active");
+  tabManual.classList.remove("active");
+  bindSearch.classList.remove("hidden");
+  bindManual.classList.add("hidden");
+});
+
+tabManual.addEventListener("click", () => {
+  tabManual.classList.add("active");
+  tabSearch.classList.remove("active");
+  bindManual.classList.remove("hidden");
+  bindSearch.classList.add("hidden");
+});
+
+// Search chats
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => searchChats(searchInput.value.trim()), 400);
+});
+
+async function searchChats(query) {
+  searchResults.innerHTML = "";
+  try {
+    const resp = await fetch(`${BACKEND_URL}/desktop/lark/chats?query=${encodeURIComponent(query)}`);
+    const data = await resp.json();
+    if (!data.ok || !data.chats.length) {
+      searchResults.innerHTML = '<div class="search-item" style="color:rgba(255,255,255,0.3)">无结果</div>';
+      return;
+    }
+    data.chats.forEach((chat) => {
+      const el = document.createElement("div");
+      el.className = "search-item";
+      el.textContent = chat.name || chat.chatId;
+      el.addEventListener("click", () => {
+        binding = { type: "chat_id", id: chat.chatId, label: chat.name };
+        updateBindingUI();
+        bindPanel.classList.add("hidden");
+      });
+      searchResults.appendChild(el);
+    });
+  } catch {
+    searchResults.innerHTML = '<div class="search-item" style="color:#f87171">搜索失败</div>';
+  }
+}
 
 btnBindConfirm.addEventListener("click", () => {
   const id = bindInput.value.trim();

@@ -145,11 +145,75 @@ body {
 
 .bind-panel {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bind-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-tab.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+}
+
+.bind-search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  outline: none;
+}
+
+.bind-search input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.search-results {
+  max-height: 100px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-item {
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-item:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.bind-manual {
+  display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.bind-panel input {
+.bind-manual input {
   flex: 1;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -160,11 +224,11 @@ body {
   outline: none;
 }
 
-.bind-panel input:focus {
+.bind-manual input:focus {
   border-color: rgba(99, 102, 241, 0.5);
 }
 
-.bind-panel select {
+.bind-manual select {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;

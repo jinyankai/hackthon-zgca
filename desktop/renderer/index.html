@@ -29,12 +29,22 @@
       </div>
 
       <div id="bind-panel" class="bind-panel hidden">
-        <input id="bind-input" type="text" placeholder="粘贴 chat_id 或 user_id" />
-        <select id="bind-type">
-          <option value="chat_id">群聊 chat_id</option>
-          <option value="user_id">用户 user_id</option>
-        </select>
-        <button id="btn-bind-confirm" class="btn-sm">确认</button>
+        <div class="bind-tabs">
+          <button id="tab-search" class="btn-tab active">搜索群聊</button>
+          <button id="tab-manual" class="btn-tab">手动粘贴</button>
+        </div>
+        <div id="bind-search" class="bind-search">
+          <input id="search-input" type="text" placeholder="输入群聊名称搜索..." />
+          <div id="search-results" class="search-results"></div>
+        </div>
+        <div id="bind-manual" class="bind-manual hidden">
+          <input id="bind-input" type="text" placeholder="粘贴 chat_id 或 user_id" />
+          <select id="bind-type">
+            <option value="chat_id">群聊 chat_id</option>
+            <option value="user_id">用户 user_id</option>
+          </select>
+          <button id="btn-bind-confirm" class="btn-sm">确认</button>
+        </div>
       </div>
 
       <textarea id="draft-input" placeholder="在这里发泄你的怒火... 按 Enter 发送" rows="3"></textarea>
