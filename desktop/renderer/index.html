@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>情绪桌宠</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="pet-bar" class="pet-bar">
+      <div class="pet-icon">🐾</div>
+      <span class="pet-label">Ctrl+Alt+Space 展开</span>
+      <span id="feishu-dot" class="status-dot offline"></span>
+    </div>
+
+    <div id="expanded-panel" class="expanded-panel hidden">
+      <div class="panel-header">
+        <span class="title">骂得痛快，发得得体</span>
+        <button id="btn-collapse" class="btn-icon" title="收起 (Esc)">✕</button>
+      </div>
+
+      <div id="feishu-warning" class="warning hidden">
+        未检测到飞书窗口，仅优化不发送
+      </div>
+
+      <div class="binding-row">
+        <span id="binding-label" class="binding-label">未绑定目标</span>
+        <button id="btn-bind" class="btn-sm">绑定</button>
+      </div>
+
+      <div id="bind-panel" class="bind-panel hidden">
+        <input id="bind-input" type="text" placeholder="粘贴 chat_id 或 user_id" />
+        <select id="bind-type">
+          <option value="chat_id">群聊 chat_id</option>
+          <option value="user_id">用户 user_id</option>
+        </select>
+        <button id="btn-bind-confirm" class="btn-sm">确认</button>
+      </div>
+
+      <textarea id="draft-input" placeholder="在这里发泄你的怒火... 按 Enter 发送" rows="3"></textarea>
+
+      <div id="result-area" class="result-area hidden">
+        <div class="result-label">优化后：</div>
+        <div id="polished-text" class="polished-text"></div>
+        <div id="send-status" class="send-status"></div>
+      </div>
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span>正在优化...</span>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
