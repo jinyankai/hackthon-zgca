@@ -24,26 +24,12 @@ async def send_to_feishu(text: str, target_type: str, target_id: str) -> FeishuS
     if not target_id:
         return FeishuSendResult(success=False, error="未指定发送目标")
 
-    content = json.dumps({"text": text}, ensure_ascii=False)
-
     if target_type == "chat_id":
-        receive_id_type = "chat_id"
+        cmd = [settings.lark_cli_path, "im", "+messages-send", "--chat-id", target_id, "--text", text]
     elif target_type == "user_id":
-        receive_id_type = "open_id"
+        cmd = [settings.lark_cli_path, "im", "+messages-send", "--user-id", target_id, "--text", text]
     else:
         return FeishuSendResult(success=False, error=f"不支持的目标类型: {target_type}")
-
-    params = json.dumps({
-        "params": {"receive_id_type": receive_id_type},
-        "data": {
-            "receive_id": target_id,
-            "msg_type": "text",
-            "content": content,
-            "uuid": uuid.uuid4().hex,
-        },
-    }, ensure_ascii=False)
-
-    cmd = [settings.feishu_cli_path, "exec", "im.v1.message.create", "--params", params]
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -54,14 +40,52 @@ async def send_to_feishu(text: str, target_type: str, target_id: str) -> FeishuS
         stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=settings.lark_send_timeout)
 
         if proc.returncode != 0:
-            err_text = stderr.decode("utf-8", errors="replace").strip() or "feishu-cli 返回非零退出码"
+            err_text = stderr.decode("utf-8", errors="replace").strip() or "lark-cli 返回非零退出码"
             return FeishuSendResult(success=False, error=err_text)
 
-        result = json.loads(stdout.decode("utf-8"))
-        msg_id = result.get("data", {}).get("message_id") or result.get("message_id")
+        output = stdout.decode("utf-8", errors="replace").strip()
+        try:
+            result = json.loads(output)
+            msg_id = result.get("data", {}).get("message_id") or result.get("message_id")
+        except (json.JSONDecodeError, AttributeError):
+            msg_id = None
+
         return FeishuSendResult(success=True, message_id=msg_id)
 
     except asyncio.TimeoutError:
         return FeishuSendResult(success=False, error="飞书发送超时")
     except Exception as e:
         return FeishuSendResult(success=False, error=str(e))
+
+
+async def search_chats(query: str = "") -> dict:
+    cmd = [settings.lark_cli_path, "im", "+chat-search"]
+    if query:
+        cmd.extend(["--query", query])
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=settings.lark_send_timeout)
+
+        if proc.returncode != 0:
+            err = stderr.decode("utf-8", errors="replace").strip()
+            return {"ok": False, "error": err or "lark-cli 返回错误", "chats": []}
+
+        output = stdout.decode("utf-8", errors="replace").strip()
+        try:
+            data = json.loads(output)
+            items = data.get("data", {}).get("items", data.get("items", []))
+        except json.JSONDecodeError:
+            items = []
+
+        chats = [{"name": item.get("name", ""), "chatId": item.get("chat_id", "")} for item in items]
+        return {"ok": True, "chats": chats, "error": None}
+
+    except asyncio.TimeoutError:
+        return {"ok": False, "error": "lark-cli 超时", "chats": []}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "chats": []}
