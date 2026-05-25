@@ -7,12 +7,13 @@ from app.config import settings
 from app.services.conversation import store
 from app.ws.routes import router as ws_router
 from app.api.transcribe import router as api_router
+from app.api.desktop import router as desktop_router
 
 app = FastAPI(title="AI Emotion Shield MVP", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(ws_router)
 app.include_router(api_router)
+app.include_router(desktop_router)
 
 
 @app.get("/health")

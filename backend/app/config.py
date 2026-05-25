@@ -20,6 +20,11 @@ class Settings:
     whisper_api_url: str | None = os.getenv("WHISPER_API_URL")
     whisper_model: str = os.getenv("WHISPER_MODEL", "whisper-1")
 
+    # Desktop / Feishu integration
+    lark_send_mode: str = os.getenv("LARK_SEND_MODE", "dry_run")  # dry_run | cli
+    feishu_cli_path: str = os.getenv("FEISHU_CLI_PATH", "feishu-cli")
+    lark_send_timeout: int = int(os.getenv("LARK_SEND_TIMEOUT_SECONDS", "10"))
+
     @property
     def llm_live_enabled(self) -> bool:
         if self.llm_provider in {"deepseek_anthropic", "anthropic"}:
